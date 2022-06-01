@@ -1,3 +1,11 @@
+# Leam Stuff
+
+# vi(m) swap files
+*.swp
+
+# Local storage of files
+data/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
