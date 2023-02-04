@@ -1,0 +1,13 @@
+# Coding Standards
+ 
+- Compatible with Python 3.6
+- Only use pure python and the standard library 
+- If submitting code; "no tests" == "no code"
+- Maintain a semblance of PEP 8
+- 4 spaces per indentation
+- Within a block, align assignments and comparisons
+- - I am old, and keeping visual organization helps me follow the code
+- This will be a one file program, with data stored in ./data
+- Use semi-colon (';') separated text files for data storage
+
+
