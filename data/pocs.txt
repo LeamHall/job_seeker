@@ -1,7 +1,4 @@
-# data/pocs.txt
+name;phone;email;first_contact;last_contact
 Fred Smythe; 555.555.1212; fred@example.com; Example, Inc ; 20230123; 20202102
 Jayne Johnson; 123.456.7890; jj@otherexample.com; Other Recruiter, LLC; 20221212; 20221212
-
-
 Jason Jayson; br-549; jay@whocares.com; Whocares, Inc; 20230101; 20230101
- 
