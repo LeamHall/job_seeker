@@ -15,5 +15,5 @@ all: clean test
 	coverage report -m 
 	python -m black -l79 .
 	-flake8 --ignore E251,E266,W391
-
+	-python -m pylint $(git ls-files '*.py')
 
