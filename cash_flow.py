@@ -13,9 +13,11 @@
 
 from argparse import ArgumentParser
 
+
 def per_month(out, income, savings, annual):
-    """ Returns an int of how much is left in monthly savings. """
+    """Returns an int of how much is left in monthly savings."""
     return int(savings + income - out - (annual / 12))
+
 
 parser = ArgumentParser()
 parser.add_argument("-o", "--out", help="Money going out", default=1, type=int)
@@ -23,7 +25,9 @@ parser.add_argument("-s", "--savings", help="Savings", default=0, type=int)
 parser.add_argument(
     "-i", "--income", help="Money coming in", default=0, type=int
 )
-parser.add_argument("-a", "--annual", help="Annual expenses", default=0, type=int)
+parser.add_argument(
+    "-a", "--annual", help="Annual expenses", default=0, type=int
+)
 args = parser.parse_args()
 
 MAX_TEST = 24

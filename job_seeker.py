@@ -28,12 +28,14 @@ class Job:
         self.first_contact = job_data.get(
             "first_contact", convert_date(dt.now())
         )
+        self.make_raw_data()
         self.searchables = [
             self.title.lower(),
             self.notes.lower(),
             self.company.lower(),
             self.url.lower(),
             self.poc_name.lower(),
+            self.raw_data.lower(),
         ]
 
     def __str__(self):
@@ -52,42 +54,57 @@ class Job:
             self.first_contact,
         )
 
-
-def job_builder(line):
-    _list = string_to_list(line)
-    data = {
-        "last_contact": _list[0],
-        "first_contact": _list[1],
-        "poc_name": _list[2],
-        "company": _list[3],
-        "notes": _list[4],
-        "active": _list[5],
-        "url": _list[6],
-        "title": _list[7],
-    }
-    return Job(data)
+    def make_raw_data(self):
+        """Creates the line properly."""
+        self.raw_data = ";".join(
+            [
+                self.poc_name,
+                self.company,
+                self.active,
+                self.url,
+                self.title,
+                self.notes,
+                self.first_contact,
+                self.last_contact,
+            ]
+        )
 
 
 class POC:
     """Stores the contact info for each Point of Contact"""
 
     def __init__(self, data={}):
-        self.name = data.get("name", "")
+        self.poc_name = data.get("poc_name", "")
         self.company = data.get("company", "")
         self.phone = data.get("phone", "")
         self.email = data.get("email", "")
         self.first_contact = data.get("first_contact", convert_date(dt.now()))
         self.last_contact = data.get("last_contact", convert_date(dt.now()))
+        self.make_raw_data()
         self.searchables = [
-            self.name.lower(),
+            self.poc_name.lower(),
             self.company.lower(),
             self.email.lower(),
+            self.raw_data.lower(),
         ]
+
+    def make_raw_data(self):
+        """Creates the line properly."""
+        self.raw_data = ";".join(
+            [
+                self.poc_name,
+                self.company,
+                self.phone,
+                self.email,
+                self.first_contact,
+                self.last_contact,
+            ]
+        )
 
     def __str__(self):
         """Returns a formatted string with the POC info"""
         return "{}, ({}) {}  [{}]\nFirst Contact: {}, Last Contact: {}".format(
-            self.name,
+            self.poc_name,
             self.phone,
             self.email,
             self.company,
@@ -96,17 +113,41 @@ class POC:
         )
 
 
-def poc_builder(line):
-    _list = string_to_list(line)
-    data = {
-        "name": _list[0],
-        "phone": _list[1],
-        "email": _list[2],
-        "company": _list[3],
-        "first_contact": _list[4],
-        "last_contact": _list[5],
-    }
-    return POC(data)
+def builder(data, klass):
+    if type(data) == dict:
+        return klass(data)
+    _list = string_to_list(data)
+    today = convert_date(dt.now())
+    if klass == POC:
+        if len(_list) < 5:
+            _list.append(today)
+        if len(_list) < 6:
+            _list.append(today)
+        data = {
+            "poc_name": _list[0],
+            "phone": _list[1],
+            "email": _list[2],
+            "company": _list[3],
+            "first_contact": _list[4],
+            "last_contact": _list[5],
+        }
+        return POC(data)
+    elif klass == Job:
+        if len(_list) < 7:
+            _list.append(today)
+        if len(_list) < 8:
+            _list.append(today)
+        data = {
+            "poc_name": _list[0],
+            "company": _list[1],
+            "active": _list[2],
+            "url": _list[3],
+            "title": _list[4],
+            "notes": _list[5],
+            "first_contact": _list[6],
+            "last_contact": _list[7],
+        }
+        return Job(data)
 
 
 def convert_date(date):
@@ -131,9 +172,9 @@ def parse_list(_list, _list_type, search):
     for element in _list:
         if search.lower() in element.lower():
             if _list_type == "poc":
-                items.append(poc_builder(element))
+                items.append(builder(element, POC))
             if _list_type == "job":
-                items.append(job_builder(element))
+                items.append(builder(element, Job))
     return items
 
 
@@ -145,10 +186,11 @@ def string_to_list(data, sep=";"):
 def items_from_file(filename, klass):
     """Takes a filename, and returns objects based on that file."""
     with open(filename, "r") as f:
+        # results = [builder(row, klass) for row in f.readlines()]
         reader = csv.DictReader(f, delimiter=";")
-        result = [klass(row) for row in reader]
+        results = [builder(row, klass) for row in reader]
 
-    return result
+    return results
 
 
 def search_items(search_term, *lists):
@@ -166,21 +208,35 @@ def search_items(search_term, *lists):
     return results
 
 
+def write_file(filename, data, string):
+    """Writes the data in the proper format."""
+    with open(filename, "w") as f:
+        f.write(string + "\n")
+        for item in data:
+            f.write(item.raw_data + "\n")
+
+
 if __name__ == "__main__":
     datadir = "data"
-    job_file = "jobs.txt"
-    poc_file = "pocs.txt"
-
+    job_file = os.path.join(datadir, "jobs.txt")
+    poc_file = os.path.join(datadir, "pocs.txt")
+    JOB_STRING = "poc_name; company; active; url; title; notes"
+    POC_STRING = "poc_name; phone; email; company"
+    INFO_STRING = """
+                Here are the formats, use semi-colons to separate data.
+                Sections can be empty, just include the semi-colon seperator.
+                Contact dates will default to the date of entry.
+                """
     try:
-        poc_list = items_from_file(os.path.join(datadir, poc_file), POC)
-        job_list = items_from_file(os.path.join(datadir, job_file), Job)
-    except:
-        print("Can't find the data files")
+        poc_list = items_from_file(poc_file, POC)
+        job_list = items_from_file(job_file, Job)
+    except Exception as e:
+        print("Can't find the data files", e)
         sys.exit(1)
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-a", "--add", help="add data, requires -r or -p", action="store_true"
+        "-a", "--add", help="add DATA, requires -j or -p", action="store_true"
     )
     parser.add_argument(
         "-j", "--job", help="use the Job info", action="store_true"
@@ -192,9 +248,23 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.add:
-        print("I am to add")
+        print(INFO_STRING)
+        print("Jobs: \n\t {}".format(JOB_STRING))
+        print("POCs: \n\t {}".format(POC_STRING))
+        data = input("> ")
+        if args.job:
+            job_list.append(builder(data, Job))
+            write_file(job_file, job_list, JOB_STRING + ";first_contact;last_contact")
+        elif args.poc:
+            poc_list.append(builder(data, POC))
+            write_file(poc_file, poc_list, POC_STRING + ";first_contact;last_contact")
+        else:
+            print("I am to add, but you give me no details.")
+            sys.exit(1)
 
     if args.search:
         results = search_items(args.search, job_list, poc_list)
+        for job in job_list:
+            print(job)
         for result in results:
             print(result, "\n")
