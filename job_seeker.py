@@ -114,7 +114,7 @@ class POC:
 
 
 def builder(data, klass):
-    if type(data) == dict:
+    if type(data) is dict:
         return klass(data)
     _list = string_to_list(data)
     today = convert_date(dt.now())
@@ -155,29 +155,6 @@ def convert_date(date):
     return "{}{:0>2}{:0>2}".format(date.year, date.month, date.day)
 
 
-def list_from_file(filename):
-    """Takes a file, removes comments/empty lines, returns a list of each line"""
-    lines = []
-    with open(filename, "r") as f:
-        for line in f:
-            line = line.strip()
-            if len(line) > 5 and not line.startswith("#"):
-                lines.append(line)
-    return lines
-
-
-def parse_list(_list, _list_type, search):
-    """Takes a list, and the element type, and prints any that match search"""
-    items = []
-    for element in _list:
-        if search.lower() in element.lower():
-            if _list_type == "poc":
-                items.append(builder(element, POC))
-            if _list_type == "job":
-                items.append(builder(element, Job))
-    return items
-
-
 def string_to_list(data, sep=";"):
     """Takes a sep separated string and converts it to a list"""
     return [e.strip() for e in data.split(sep)]
@@ -186,7 +163,6 @@ def string_to_list(data, sep=";"):
 def items_from_file(filename, klass):
     """Takes a filename, and returns objects based on that file."""
     with open(filename, "r") as f:
-        # results = [builder(row, klass) for row in f.readlines()]
         reader = csv.DictReader(f, delimiter=";")
         results = [builder(row, klass) for row in reader]
 
@@ -220,8 +196,8 @@ if __name__ == "__main__":
     datadir = "data"
     job_file = os.path.join(datadir, "jobs.txt")
     poc_file = os.path.join(datadir, "pocs.txt")
-    JOB_STRING = "poc_name; company; active; url; title; notes"
-    POC_STRING = "poc_name; phone; email; company"
+    JOB_STRING = "poc_name;company;active;url;title;notes"
+    POC_STRING = "poc_name;phone;email;company"
     INFO_STRING = """
                 Here are the formats, use semi-colons to separate data.
                 Sections can be empty, just include the semi-colon seperator.
@@ -254,17 +230,19 @@ if __name__ == "__main__":
         data = input("> ")
         if args.job:
             job_list.append(builder(data, Job))
-            write_file(job_file, job_list, JOB_STRING + ";first_contact;last_contact")
+            write_file(
+                job_file, job_list, JOB_STRING + ";first_contact;last_contact"
+            )
         elif args.poc:
             poc_list.append(builder(data, POC))
-            write_file(poc_file, poc_list, POC_STRING + ";first_contact;last_contact")
+            write_file(
+                poc_file, poc_list, POC_STRING + ";first_contact;last_contact"
+            )
         else:
             print("I am to add, but you give me no details.")
             sys.exit(1)
 
     if args.search:
         results = search_items(args.search, job_list, poc_list)
-        for job in job_list:
-            print(job)
         for result in results:
             print(result, "\n")

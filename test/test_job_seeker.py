@@ -26,7 +26,7 @@ class TestJobSeeker(unittest.TestCase):
         }
 
         self.poc_data_1 = {
-            "name": "Fred Smythe",
+            "poc_name": "Fred Smythe",
             "phone": "555.555.1212",
             "email": "fred@example.com",
             "company": "Example, Inc",
@@ -93,16 +93,16 @@ class TestJobSeeker(unittest.TestCase):
         self.assertTrue(j.url == "https://example.com/r12345")
         self.assertTrue(j.title == "Senior Automation Engineer")
 
-    def test_job_builder(self):
-        job_line = "20230123;20230201;Fred Smythe; Some Great Place, LLC; linux, ansible, python; y; https://example.com/r12345; Senior Automation Engineer"
-        job = job_seeker.job_builder(job_line)
+    def test_builder(self):
+        line = "Fred Smythe; Some Great Place, LLC;y; https://example.com/r12345; Senior Automation Engineer;linux"
+        job = job_seeker.builder(line, job_seeker.Job)
         self.assertTrue(job.title == "Senior Automation Engineer")
 
     def test_poc_defaults(self):
         p = job_seeker.POC()
         date = dt.now()
         year = str(date.year)
-        self.assertFalse(p.name)
+        self.assertFalse(p.poc_name)
         self.assertFalse(p.email)
         self.assertFalse(p.phone)
         self.assertTrue(p.first_contact.startswith(year))
@@ -110,7 +110,7 @@ class TestJobSeeker(unittest.TestCase):
 
     def test_poc_data(self):
         p = job_seeker.POC(self.poc_data_1)
-        self.assertTrue(p.name == "Fred Smythe")
+        self.assertTrue(p.poc_name == "Fred Smythe")
         self.assertTrue(p.phone == "555.555.1212")
         self.assertTrue(p.email == "fred@example.com")
         self.assertTrue(p.company == "Example, Inc")
@@ -127,14 +127,6 @@ class TestJobSeeker(unittest.TestCase):
         self.assertTrue(
             results[1] == "First Contact: 20230123, Last Contact: 20230201"
         )
-
-    def test_list_from_file(self):
-        l = job_seeker.list_from_file(self.data_file)
-        self.assertTrue(len(l) == 1)
-        self.assertTrue(l[0] == "good line")
-
-    def test_parse_list(self):
-        pass
 
     def test_searchables(self):
         j = job_seeker.Job(self.job_data_1)
