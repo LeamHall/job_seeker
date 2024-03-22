@@ -1,5 +1,5 @@
 poc_name;company;active;url;title;notes;first_contact;last_contact
 Fred Smythe;Some Great Place, LLC;y;https://example.com/r12345;Senior Automation Engineer; python,linux,ansible;20220204;20230101
 Jason Jason;Not here Inc;n;https://whocares.com;Winderz admin;powershell;20230101;20230101
-Jim Jones;Hisco;Linux guy;y;hs.co;mostly doing ansible;20240321;20240321
+Jim Jones;Hisco;y;hs.co;linux guy;mostly doing ansible;20240321;20240321
 Sam Gamgee;The Shire;y;theshire.net/jobs/r12345;Server Gardner;lots of RHEL and Python;20240321;20240321
