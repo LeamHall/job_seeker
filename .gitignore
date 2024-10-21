@@ -1,5 +1,7 @@
 # Leam Stuff
 
+tmp/
+
 # vi(m) swap files
 *.swp
 
