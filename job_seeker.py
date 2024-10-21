@@ -43,7 +43,7 @@ class Job:
             self.active = "Yes"
         else:
             self.active = "No"
-        return "Title: {}\nActive: {}\nNotes: {}\nCompany: {} ({})\nPOC:  {} \nLast contact: {}\nFirst contact: {}".format(
+        return "Title: {}\nActive: {}\nNotes: {}\nCompany: {}\nURL: {}\nPOC:  {} \nLast contact: {}\nFirst contact: {}".format(
             self.title,
             self.active,
             self.notes,
@@ -68,6 +68,18 @@ class Job:
                 self.last_contact,
             ]
         )
+
+
+class Company:
+    """Stores the key, name, url, and POCs for a company"""
+    
+    def __init__(self, data={}):
+        self.key = data.get("key", "").lower()
+        self.name = data.get("name", "")
+        self.job_url = data.get("job_url", "")
+
+    def make_poc_list(self, pocs):
+        return []
 
 
 class POC:
@@ -114,40 +126,16 @@ class POC:
 
 
 def builder(data, klass):
-    if type(data) is dict:
-        return klass(data)
-    _list = string_to_list(data)
+    """Return an object based on a data dict"""
     today = convert_date(dt.now())
-    if klass == POC:
-        if len(_list) < 5:
-            _list.append(today)
-        if len(_list) < 6:
-            _list.append(today)
-        data = {
-            "poc_name": _list[0],
-            "phone": _list[1],
-            "email": _list[2],
-            "company": _list[3],
-            "first_contact": _list[4],
-            "last_contact": _list[5],
-        }
-        return POC(data)
-    elif klass == Job:
-        if len(_list) < 7:
-            _list.append(today)
-        if len(_list) < 8:
-            _list.append(today)
-        data = {
-            "poc_name": _list[0],
-            "company": _list[1],
-            "active": _list[2],
-            "url": _list[3],
-            "title": _list[4],
-            "notes": _list[5],
-            "first_contact": _list[6],
-            "last_contact": _list[7],
-        }
-        return Job(data)
+    if type(data) is dict:
+        if data["first_contact"] is None:
+            data["first_contact"] = today
+        if data["last_contact"] is None:
+            data["last_contact"] = today
+        return klass(data)
+    else:
+        raise ValueError("Requires a dict input")
 
 
 def convert_date(date):
@@ -162,10 +150,10 @@ def string_to_list(data, sep=";"):
 
 def items_from_file(filename, klass):
     """Takes a filename, and returns objects based on that file."""
+    results = list()
     with open(filename, "r") as f:
         reader = csv.DictReader(f, delimiter=";")
         results = [builder(row, klass) for row in reader]
-
     return results
 
 
@@ -196,8 +184,10 @@ if __name__ == "__main__":
     datadir = "data"
     job_file = os.path.join(datadir, "jobs.txt")
     poc_file = os.path.join(datadir, "pocs.txt")
-    JOB_STRING = "poc_name;company;active;url;title;notes"
-    POC_STRING = "poc_name;phone;email;company"
+    JOB_STRING = (
+        "poc_name;company;active;url;title;notes;first_contact;last_contact"
+    )
+    POC_STRING = "poc_name;phone;email;company;first_contact;last_contact"
     INFO_STRING = """
                 Here are the formats, use semi-colons to separate data.
                 Sections can be empty, just include the semi-colon seperator.
@@ -205,6 +195,7 @@ if __name__ == "__main__":
                 """
     try:
         poc_list = items_from_file(poc_file, POC)
+        print("about to do items_from_file on jobs.")
         job_list = items_from_file(job_file, Job)
     except Exception as e:
         print("Can't find the data files", e)

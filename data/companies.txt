@@ -1,0 +1,6 @@
+company_key;company;job_url
+sgpl;Some Great Place, LLC; somegreatplace.com/jobs
+noth;Not Here, Inc; nothereinc.com/jobs
+hisc;Hisco; hs.co/jobs
+shre;The Shire; theshire.net/jobs
+

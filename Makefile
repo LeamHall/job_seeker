@@ -10,10 +10,13 @@ clean:
 	find . -type f -name "*.pyc" -exec rm {} \;
 	find . -type f -name "*.swp" -exec rm {} \;
 
-all: clean test
+lint:
+	-flake8 --ignore E251,E266,W391
+	-python -m pylint --recursive y --disable=C0209,C0116,R1734 .
+
+coverage:
 	coverage run -m unittest
 	coverage report -m 
-	python -m black -l79 .
-	-flake8 --ignore E251,E266,W391
-	-python -m pylint --recursive y .
+
+all: clean lint test coverage
 

@@ -4,6 +4,8 @@
 # author  :	Leam Hall
 # desc    :	Test job_seeker.py
 
+# pylint: skip-file
+
 from datetime import datetime as dt
 import os.path
 import tempfile
@@ -54,6 +56,12 @@ class TestJobSeeker(unittest.TestCase):
             "last_contact": "20230101",
         }
 
+        self.company_data_1 = {
+            "key": "sGPL",
+            "name": "Some Great Place, LLC",
+            "job_url": "https://www.sgpl.com/jobs",
+        }
+
         self.test_dir = tempfile.TemporaryDirectory()
         self.data_file = os.path.join(self.test_dir.name, "data.txt")
         with open(self.data_file, "w") as f:
@@ -94,8 +102,7 @@ class TestJobSeeker(unittest.TestCase):
         self.assertTrue(j.title == "Senior Automation Engineer")
 
     def test_builder(self):
-        line = "Fred Smythe; Some Great Place, LLC;y; https://example.com/r12345; Senior Automation Engineer;linux"
-        job = job_seeker.builder(line, job_seeker.Job)
+        job = job_seeker.builder(self.job_data_1, job_seeker.Job)
         self.assertTrue(job.title == "Senior Automation Engineer")
 
     def test_poc_defaults(self):
@@ -133,3 +140,9 @@ class TestJobSeeker(unittest.TestCase):
         self.assertIn("fred smythe", j.searchables)
         p = job_seeker.POC(self.poc_data_1)
         self.assertIn("fred smythe", p.searchables)
+
+    def test_company_info(self):
+        c = job_seeker.Company(self.company_data_1)
+        self.assertEqual(c.key, "sgpl")
+        self.assertEqual(c.name, "Some Great Place, LLC")
+        self.assertEqual(c.job_url, "https://www.sgpl.com/jobs")
